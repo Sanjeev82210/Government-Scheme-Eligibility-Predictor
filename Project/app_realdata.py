@@ -140,12 +140,30 @@ MAIN_PAGE_HTML = """
             border-radius: 10px;
             font-size: 1em;
             transition: border-color 0.3s;
+            background: white;
+            color: #1f2937;
+        }
+        
+        input[type="number"]::placeholder {
+            color: #9ca3af;
         }
         
         input[type="number"]:focus,
         select:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
+        }
+        
+        select {
+            cursor: pointer;
+            color: #1f2937;
+            background: white;
+        }
+        
+        select option {
+            background: white;
+            color: #1f2937;
         }
         
         .form-row {
@@ -396,16 +414,20 @@ MAIN_PAGE_HTML = """
                 <strong>📌 How it works:</strong> Enter your details below and we'll match you with relevant government schemes from our database of <strong>{{ total_schemes }}</strong> real schemes!
             </div>
             
-            <form method="POST" action="/">
+            <form method="POST" action="/" autocomplete="off" id="schemeForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="age">👤 Age (years)</label>
-                        <input type="number" id="age" name="age" min="0" max="120" value="25" required>
+                        <input type="number" id="age" name="age" min="0" max="120" 
+                               {% if user_data %}value="{{ user_data.age }}"{% else %}placeholder="Enter your age"{% endif %} 
+                               autocomplete="off" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="income">💰 Annual Income (₹)</label>
-                        <input type="number" id="income" name="income" min="0" step="1000" value="300000" required>
+                        <input type="number" id="income" name="income" min="0" step="1000" 
+                               {% if user_data %}value="{{ user_data.income|int }}"{% else %}placeholder="e.g., 300000"{% endif %} 
+                               autocomplete="off" required>
                     </div>
                 </div>
                 
@@ -413,27 +435,27 @@ MAIN_PAGE_HTML = """
                     <div class="form-group">
                         <label for="occupation">💼 Occupation</label>
                         <select id="occupation" name="occupation" required>
-                            <option value="Student">Student</option>
-                            <option value="Farmer">Farmer</option>
-                            <option value="Government">Government Employee</option>
-                            <option value="Private">Private Employee</option>
-                            <option value="MSME">MSME/Entrepreneur</option>
-                            <option value="Self-Employed">Self-Employed</option>
-                            <option value="Unemployed">Unemployed</option>
-                            <option value="Retired">Retired</option>
-                            <option value="Worker">Worker/Labour</option>
+                            <option value="Student" {% if user_data and user_data.occupation == 'Student' %}selected{% endif %}>Student</option>
+                            <option value="Farmer" {% if user_data and user_data.occupation == 'Farmer' %}selected{% endif %}>Farmer</option>
+                            <option value="Government" {% if user_data and user_data.occupation == 'Government' %}selected{% endif %}>Government Employee</option>
+                            <option value="Private" {% if user_data and user_data.occupation == 'Private' %}selected{% endif %}>Private Employee</option>
+                            <option value="MSME" {% if user_data and user_data.occupation == 'MSME' %}selected{% endif %}>MSME/Entrepreneur</option>
+                            <option value="Self-Employed" {% if user_data and user_data.occupation == 'Self-Employed' %}selected{% endif %}>Self-Employed</option>
+                            <option value="Unemployed" {% if user_data and user_data.occupation == 'Unemployed' %}selected{% endif %}>Unemployed</option>
+                            <option value="Retired" {% if user_data and user_data.occupation == 'Retired' %}selected{% endif %}>Retired</option>
+                            <option value="Worker" {% if user_data and user_data.occupation == 'Worker' %}selected{% endif %}>Worker/Labour</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="category">📋 Category</label>
                         <select id="category" name="category" required>
-                            <option value="General">General</option>
-                            <option value="SC">SC</option>
-                            <option value="ST">ST</option>
-                            <option value="OBC">OBC</option>
-                            <option value="WOMEN">Women</option>
-                            <option value="MINORITY">Minority</option>
+                            <option value="General" {% if user_data and user_data.category == 'General' %}selected{% endif %}>General</option>
+                            <option value="SC" {% if user_data and user_data.category == 'SC' %}selected{% endif %}>SC</option>
+                            <option value="ST" {% if user_data and user_data.category == 'ST' %}selected{% endif %}>ST</option>
+                            <option value="OBC" {% if user_data and user_data.category == 'OBC' %}selected{% endif %}>OBC</option>
+                            <option value="WOMEN" {% if user_data and user_data.category == 'WOMEN' %}selected{% endif %}>Women</option>
+                            <option value="MINORITY" {% if user_data and user_data.category == 'MINORITY' %}selected{% endif %}>Minority</option>
                         </select>
                     </div>
                 </div>
@@ -442,31 +464,31 @@ MAIN_PAGE_HTML = """
                     <div class="form-group">
                         <label for="location">📍 State</label>
                         <select id="location" name="location" required>
-                            <option value="Delhi">Delhi</option>
-                            <option value="Maharashtra">Maharashtra</option>
-                            <option value="Karnataka">Karnataka</option>
-                            <option value="Tamil Nadu">Tamil Nadu</option>
-                            <option value="Uttar Pradesh">Uttar Pradesh</option>
-                            <option value="Gujarat">Gujarat</option>
-                            <option value="Rajasthan">Rajasthan</option>
-                            <option value="West Bengal">West Bengal</option>
-                            <option value="Punjab">Punjab</option>
-                            <option value="Haryana">Haryana</option>
-                            <option value="Kerala">Kerala</option>
-                            <option value="Other">Other</option>
+                            <option value="Delhi" {% if user_data and user_data.location == 'Delhi' %}selected{% endif %}>Delhi</option>
+                            <option value="Maharashtra" {% if user_data and user_data.location == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+                            <option value="Karnataka" {% if user_data and user_data.location == 'Karnataka' %}selected{% endif %}>Karnataka</option>
+                            <option value="Tamil Nadu" {% if user_data and user_data.location == 'Tamil Nadu' %}selected{% endif %}>Tamil Nadu</option>
+                            <option value="Uttar Pradesh" {% if user_data and user_data.location == 'Uttar Pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+                            <option value="Gujarat" {% if user_data and user_data.location == 'Gujarat' %}selected{% endif %}>Gujarat</option>
+                            <option value="Rajasthan" {% if user_data and user_data.location == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
+                            <option value="West Bengal" {% if user_data and user_data.location == 'West Bengal' %}selected{% endif %}>West Bengal</option>
+                            <option value="Punjab" {% if user_data and user_data.location == 'Punjab' %}selected{% endif %}>Punjab</option>
+                            <option value="Haryana" {% if user_data and user_data.location == 'Haryana' %}selected{% endif %}>Haryana</option>
+                            <option value="Kerala" {% if user_data and user_data.location == 'Kerala' %}selected{% endif %}>Kerala</option>
+                            <option value="Other" {% if user_data and user_data.location == 'Other' %}selected{% endif %}>Other</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="education">🎓 Education</label>
                         <select id="education" name="education" required>
-                            <option value="Primary">Primary School</option>
-                            <option value="High School">High School</option>
-                            <option value="Undergraduate">Undergraduate</option>
-                            <option value="Graduate">Graduate</option>
-                            <option value="Postgraduate">Postgraduate</option>
-                            <option value="Diploma">Diploma/ITI</option>
-                            <option value="Professional">Professional Degree</option>
+                            <option value="Primary" {% if user_data and user_data.education == 'Primary' %}selected{% endif %}>Primary School</option>
+                            <option value="High School" {% if user_data and user_data.education == 'High School' %}selected{% endif %}>High School</option>
+                            <option value="Undergraduate" {% if user_data and user_data.education == 'Undergraduate' %}selected{% endif %}>Undergraduate</option>
+                            <option value="Graduate" {% if user_data and user_data.education == 'Graduate' %}selected{% endif %}>Graduate</option>
+                            <option value="Postgraduate" {% if user_data and user_data.education == 'Postgraduate' %}selected{% endif %}>Postgraduate</option>
+                            <option value="Diploma" {% if user_data and user_data.education == 'Diploma' %}selected{% endif %}>Diploma/ITI</option>
+                            <option value="Professional" {% if user_data and user_data.education == 'Professional' %}selected{% endif %}>Professional Degree</option>
                         </select>
                     </div>
                 </div>
@@ -474,23 +496,51 @@ MAIN_PAGE_HTML = """
                 <div class="form-row">
                     <div class="form-group">
                         <label for="family_size">👨‍👩‍👧‍👦 Family Size</label>
-                        <input type="number" id="family_size" name="family_size" min="1" max="20" value="4" required>
+                        <input type="number" id="family_size" name="family_size" min="1" max="20" 
+                               {% if user_data %}value="{{ user_data.family_size }}"{% else %}placeholder="Enter family size"{% endif %} 
+                               autocomplete="off" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="years_experience">⏱️ Work Experience (years)</label>
-                        <input type="number" id="years_experience" name="years_experience" min="0" max="60" value="2" required>
+                        <input type="number" id="years_experience" name="years_experience" min="0" max="60" 
+                               {% if user_data %}value="{{ user_data.years_experience }}"{% else %}placeholder="Years of experience"{% endif %} 
+                               autocomplete="off" required>
                     </div>
                 </div>
                 
                 <button type="submit" class="btn">🔍 Find My Schemes</button>
             </form>
             
+            <script>
+                // Debug: Show what values are being submitted
+                document.getElementById('schemeForm').addEventListener('submit', function(e) {
+                    const formData = new FormData(this);
+                    console.log('=== FORM SUBMISSION DEBUG ===');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(key + ': ' + value);
+                    }
+                    console.log('============================');
+                });
+            </script>
+            
             {% if results %}
             <div class="results">
                 <div class="results-header">
                     <h2>🎯 Your Matching Schemes</h2>
                     <p style="color: #6b7280; margin-top: 10px;">Found {{ results|length }} schemes that match your profile</p>
+                </div>
+                
+                <div class="info-box" style="background: #fef3c7; border-left-color: #f59e0b; margin-bottom: 20px;">
+                    <strong>📋 Your Submitted Profile:</strong><br>
+                    Age: <strong>{{ user_data.age }}</strong> years | 
+                    Income: <strong>₹{{ "{:,}".format(user_data.income|int) }}</strong> | 
+                    Occupation: <strong>{{ user_data.occupation }}</strong> | 
+                    Category: <strong>{{ user_data.category }}</strong><br>
+                    Location: <strong>{{ user_data.location }}</strong> | 
+                    Education: <strong>{{ user_data.education }}</strong> | 
+                    Family Size: <strong>{{ user_data.family_size }}</strong> | 
+                    Experience: <strong>{{ user_data.years_experience }}</strong> years
                 </div>
                 
                 <div class="stats-grid">
@@ -749,20 +799,38 @@ DATASET_PAGE_HTML = """
 def index():
     """Main prediction page"""
     if request.method == 'POST':
-        # Get user input
-        user_data = {
-            'age': int(request.form.get('age', 25)),
-            'income': float(request.form.get('income', 300000)),
-            'occupation': request.form.get('occupation', 'Student'),
-            'category': request.form.get('category', 'General'),
-            'location': request.form.get('location', 'Delhi'),
-            'education': request.form.get('education', 'Graduate'),
-            'family_size': int(request.form.get('family_size', 4)),
-            'years_experience': int(request.form.get('years_experience', 2))
-        }
+        # Get user input with validation
+        try:
+            user_data = {
+                'age': int(request.form['age']),
+                'income': float(request.form['income']),
+                'occupation': request.form['occupation'],
+                'category': request.form['category'],
+                'location': request.form['location'],
+                'education': request.form['education'],
+                'family_size': int(request.form['family_size']),
+                'years_experience': int(request.form['years_experience'])
+            }
+        except (KeyError, ValueError) as e:
+            return f"Error: Missing or invalid form data. Please fill all fields. ({str(e)})", 400
         
-        # Get predictions
-        results = predictor.predict_schemes(user_data, top_n=15)
+        # Debug: Print received values
+        print("\n" + "="*60)
+        print("📝 RECEIVED USER INPUT:")
+        for key, value in user_data.items():
+            print(f"   {key}: {value}")
+        print("="*60 + "\n")
+        
+        # Get ALL matching schemes with confidence ≥ 60%
+        # Setting top_n=500 to check a large pool, then filter by confidence
+        results = predictor.predict_schemes(user_data, top_n=500, min_confidence=60)
+        
+        # If no good matches found (very rare), show top 10 with lower threshold
+        if len(results) == 0:
+            print("⚠️ No schemes found with 60%+ confidence, showing top 10 with lower threshold...")
+            results = predictor.predict_schemes(user_data, top_n=10, min_confidence=50)
+        
+        print(f"📊 Final Results: {len(results)} schemes matching your profile (confidence ≥ 60%)")
         
         # Calculate statistics
         eligible_count = sum(1 for r in results if r['eligible'])
@@ -773,6 +841,7 @@ def index():
         return render_template_string(
             MAIN_PAGE_HTML,
             results=results,
+            user_data=user_data,
             user_data_json=json.dumps(user_data),
             eligible_count=eligible_count,
             avg_confidence=round(avg_confidence, 1),
@@ -781,7 +850,7 @@ def index():
             total_schemes=len(predictor.schemes_df)
         )
     
-    return render_template_string(MAIN_PAGE_HTML, total_schemes=len(predictor.schemes_df))
+    return render_template_string(MAIN_PAGE_HTML, total_schemes=len(predictor.schemes_df), user_data=None)
 
 
 @app.route('/dataset')

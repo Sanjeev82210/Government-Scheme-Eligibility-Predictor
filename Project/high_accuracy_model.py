@@ -263,8 +263,18 @@ class HighAccuracyPredictor:
         profile = ' '.join(keywords)
         return self.advanced_clean(profile)
     
-    def predict_schemes(self, user_data, top_n=15):
-        """ENSEMBLE PREDICTION with triple scoring"""
+    def predict_schemes(self, user_data, top_n=15, min_confidence=0):
+        """
+        ENSEMBLE PREDICTION with triple scoring
+        
+        Args:
+            user_data: User profile dictionary
+            top_n: Maximum number of schemes to return
+            min_confidence: Minimum confidence threshold (0-100). Only schemes above this are returned.
+        
+        Returns:
+            List of matching schemes, filtered by min_confidence
+        """
         profile = self.create_enhanced_profile(user_data)
         
         # Get vectors for user profile
@@ -304,14 +314,35 @@ class HighAccuracyPredictor:
         # Get top schemes
         top_indices = ensemble_score.argsort()[-top_n:][::-1]
         
+        # Debug: Show score distribution
+        top_scores = ensemble_score[top_indices]
+        print(f"\n🔍 Score Distribution (Top {top_n}):")
+        print(f"   Highest: {top_scores[0]:.4f}")
+        print(f"   Lowest:  {top_scores[-1]:.4f}")
+        print(f"   Average: {top_scores.mean():.4f}")
+        
         results = []
         for idx in top_indices:
             scheme = self.schemes_df.iloc[idx]
             score = ensemble_score[idx]
             
-            # Enhanced confidence: scale to 40-95 range for better perception
-            confidence = 40 + (score * 150)  # More aggressive scaling
-            confidence = min(95, max(40, confidence))
+            # More realistic confidence scaling based on actual cosine similarity ranges
+            # Typical scores: 0.1-0.6 range, with 0.4+ being very good
+            if score > 0.40:  # Excellent match (rare)
+                confidence = 80 + (score * 30)  # 92-98% range
+            elif score > 0.30:  # Very good match
+                confidence = 70 + (score * 35)  # 80-84% range
+            elif score > 0.20:  # Good match
+                confidence = 60 + (score * 40)  # 68-76% range
+            elif score > 0.10:  # Moderate match
+                confidence = 50 + (score * 50)  # 55-65% range
+            else:  # Weak match
+                confidence = 35 + (score * 100)  # 35-45% range
+            
+            confidence = min(98, max(35, confidence))
+            
+            # Stricter eligibility: only schemes with 70%+ confidence are truly eligible
+            is_eligible = confidence >= 70
             
             results.append({
                 'scheme_id': f'SCH{idx:04d}',
@@ -323,10 +354,15 @@ class HighAccuracyPredictor:
                 'level': scheme['level'],
                 'category': scheme['schemeCategory'],
                 'probability': float(confidence),
-                'eligible': confidence > 50,
+                'eligible': is_eligible,
                 'similarity_score': float(score),
-                'match_quality': 'Excellent' if confidence >= 75 else 'Very Good' if confidence >= 65 else 'Good' if confidence >= 55 else 'Fair'
+                'match_quality': 'Excellent' if confidence >= 80 else 'Very Good' if confidence >= 70 else 'Good' if confidence >= 60 else 'Fair'
             })
+        
+        # Filter by minimum confidence threshold
+        if min_confidence > 0:
+            results = [r for r in results if r['probability'] >= min_confidence]
+            print(f"✓ Filtered to {len(results)} schemes with confidence ≥ {min_confidence}%")
         
         return results
     
