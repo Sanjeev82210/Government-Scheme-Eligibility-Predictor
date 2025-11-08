@@ -769,7 +769,7 @@ DATASET_PAGE_HTML = """
         
         <div class="content">
             <div class="scheme-grid">
-                {% for scheme in schemes[:50] %}
+                {% for scheme in schemes %}
                 <div class="scheme-card">
                     <div class="scheme-name">{{ loop.index }}. {{ scheme.scheme_name }}</div>
                     <div>
@@ -782,11 +782,9 @@ DATASET_PAGE_HTML = """
                 {% endfor %}
             </div>
             
-            {% if total_schemes > 50 %}
-            <p style="text-align: center; margin-top: 30px; color: #6b7280;">
-                Showing 50 of {{ total_schemes }} schemes
+            <p style="text-align: center; margin-top: 30px; color: #6b7280; font-weight: 600;">
+                Displaying all {{ total_schemes }} government schemes
             </p>
-            {% endif %}
         </div>
     </div>
 </body>
