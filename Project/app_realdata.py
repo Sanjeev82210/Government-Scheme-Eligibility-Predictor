@@ -1136,9 +1136,71 @@ def insights():
 @app.route('/download_pdf')
 def download_pdf():
     """Generate and download PDF report"""
-    # This is a placeholder - you can implement PDF generation
     from flask import make_response
-    response = make_response("PDF generation coming soon!")
+    from io import BytesIO
+    import json
+    from datetime import datetime
+    
+    # Get user data from query parameter
+    user_data_json = request.args.get('user_data', '{}')
+    user_data = json.loads(user_data_json)
+    
+    # Get predictions
+    if user_data:
+        results = predictor.predict_schemes(user_data, top_n=500, min_confidence=60)
+    else:
+        return "No user data provided", 400
+    
+    # Create PDF content as text (simple approach without reportlab)
+    pdf_content = f"""
+GOVERNMENT SCHEME ELIGIBILITY REPORT
+Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+================================================================================
+
+USER PROFILE:
+- Age: {user_data.get('age', 'N/A')} years
+- Annual Income: ₹{user_data.get('income', 'N/A'):,.0f}
+- Occupation: {user_data.get('occupation', 'N/A')}
+- Category: {user_data.get('category', 'N/A')}
+- Location: {user_data.get('location', 'N/A')}
+- Education: {user_data.get('education', 'N/A')}
+- Family Size: {user_data.get('family_size', 'N/A')}
+- Work Experience: {user_data.get('years_experience', 'N/A')} years
+
+================================================================================
+MATCHING SCHEMES FOUND: {len(results)}
+================================================================================
+
+"""
+    
+    # Add each scheme
+    for i, scheme in enumerate(results, 1):
+        pdf_content += f"""
+{i}. {scheme['scheme_name']}
+{'='*80}
+Confidence Score: {scheme['probability']:.1f}%
+Eligibility Status: {'✓ ELIGIBLE' if scheme['eligible'] else '✗ NOT ELIGIBLE'}
+Level: {scheme['level']}
+Category: {scheme['category']}
+
+BENEFITS:
+{scheme['benefits']}
+
+ELIGIBILITY CRITERIA:
+{scheme['eligibility']}
+
+DETAILS:
+{scheme['details']}
+
+{'='*80}
+
+"""
+    
+    # Create response
+    response = make_response(pdf_content)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename=scheme_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+    
     return response
 
 
